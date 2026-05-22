@@ -22,8 +22,7 @@ Pastikan Anda telah menginstal Python 3.x di komputer Anda.
 1. Buka terminal atau command prompt pada folder proyek.
 2. Jalankan perintah berikut untuk memulai server lokal:
    python app.py
-3. Buka web browser Anda dan akses alamat berikut:
-   http://127.0.0.1:5000/
+3. Buka web browser Anda
 
 ## Cara Pengoperasian
 1. Pada antarmuka web, klik kotak "Upload Main Image" untuk mengunggah gambar utama yang ingin diberi watermark.
