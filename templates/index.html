@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Watermarking System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="background-animation"></div>
+    
+    <main class="container glass-panel">
+        <header>
+            <h1>Digital Watermarking System</h1>
+            <p>Protect your visual identity with seamless & transparent matrix processing.</p>
+        </header>
+
+        <section class="upload-section">
+            <form id="watermark-form" style="width: 100%;">
+                
+                <div class="app-layout" style="display: flex; gap: 2rem; flex-wrap: wrap; align-items: flex-start;">
+                    
+                    <!-- Left Column: Uploads & Button -->
+                    <div class="controls-column" style="flex: 1; min-width: 320px;">
+                        <div class="upload-grid" style="grid-template-columns: 1fr; gap: 1.5rem;">
+                            <!-- Main Image Upload -->
+                            <div class="upload-box" id="main-upload-box">
+                                <input type="file" id="main_image" name="main_image" accept="image/png, image/jpeg" required hidden>
+                                <div class="upload-content">
+                                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <h3>Upload Main Image</h3>
+                                    <p>Click to Browse</p>
+                                    <img id="main-preview" class="preview-img" style="display:none;" />
+                                </div>
+                            </div>
+
+                            <!-- Logo Upload -->
+                            <div class="upload-box" id="logo-upload-box">
+                                <input type="file" id="logo" name="logo" accept="image/png, image/jpeg" required hidden>
+                                <div class="upload-content">
+                                    <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                                    <h3>Upload Logo Watermark</h3>
+                                    <p>Click to Browse</p>
+                                    <img id="logo-preview" class="preview-img" style="display:none;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Process Button (Moved under uploads) -->
+                        <div style="margin-top: 2rem;">
+                            <button type="submit" class="btn-primary" id="process-btn" style="width: 100%;">
+                                <span>Process Watermark</span>
+                                <div class="spinner" id="btn-spinner" style="display:none;"></div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Visual Editor & Settings -->
+                    <div class="editor-column" style="flex: 2; min-width: 400px; display: flex; flex-direction: column; gap: 1rem;">
+                        
+                        <!-- Visual Editor Section -->
+                        <div class="editor-section glass-panel-inner" id="editor-section" style="display: none; margin: 0;">
+                            <h4 style="margin-bottom: 1rem; color: var(--primary-color);">Visual Editor (Drag Logo to Position)</h4>
+                            <div class="canvas-container" id="canvas-container">
+                                <img id="canvas-main-img" alt="Main Canvas">
+                                <div id="canvas-logo-container">
+                                    <img id="canvas-logo-img" alt="Logo Canvas">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alpha/Beta Settings -->
+                        <div class="settings-box glass-panel-inner" id="settings-section" style="display: none; margin: 0;">
+                            <h4>Blending Settings</h4>
+                            <div class="sliders" style="grid-template-columns: 1fr 1fr;">
+                                <div class="slider-group">
+                                    <label for="alpha">Main Image Transp. (&alpha;): <span id="alpha-val">0.7</span></label>
+                                    <input type="range" id="alpha" name="alpha" min="0.1" max="1.0" step="0.1" value="0.7">
+                                </div>
+                                <div class="slider-group">
+                                    <label for="beta">Logo Transp. (&beta;): <span id="beta-val">0.3</span></label>
+                                    <input type="range" id="beta" name="beta" min="0.1" max="1.0" step="0.1" value="0.3">
+                                </div>
+                                <div class="slider-group">
+                                    <label for="scale">Logo Size (%): <span id="scale-val">15</span>%</label>
+                                    <input type="range" id="scale" name="scale" min="1" max="100" step="1" value="15">
+                                </div>
+                                <div class="slider-group">
+                                    <label for="angle">Rotation Angle (&deg;): <span id="angle-val">0</span>&deg;</label>
+                                    <input type="range" id="angle" name="angle" min="-180" max="180" step="1" value="0">
+                                </div>
+                                <div class="slider-group" style="display:none;">
+                                    <input type="hidden" id="pos_x" name="pos_x" value="1.0">
+                                    <input type="hidden" id="pos_y" name="pos_y" value="1.0">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </section>
+
+        <!-- Result Section -->
+        <section class="result-section" id="result-section" style="display: none;">
+            <h2>Resulting Image</h2>
+            <div class="result-container glass-panel-inner">
+                <img id="result-img" alt="Watermarked Image" />
+            </div>
+            <a id="download-btn" class="btn-secondary" download>Download Image</a>
+        </section>
+        
+        <!-- Error Alert -->
+        <div id="error-alert" class="alert error" style="display: none;"></div>
+    </main>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
