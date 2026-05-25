@@ -26,9 +26,9 @@ Pastikan Anda telah menginstal Python 3.x di komputer Anda.
 
 ## Cara Pengoperasian
 1. Pada antarmuka web, klik kotak "Upload Main Image" untuk mengunggah gambar utama yang ingin diberi watermark.
-2. Klik kotak "Upload Logo Watermark" untuk mengunggah gambar logo (disarankan menggunakan format PNG dengan latar belakang transparan).
+2. Klik kotak "Upload Logo Watermark" untuk mengunggah gambar logo, usahakan logo yang di upload memiliki background putih untuk auto transparency atau langsung menggunakan gambar png yang sudah transparan.
 3. Setelah kedua gambar diunggah, Visual Editor akan muncul di sebelah kanan layar.
-4. Tahan dan geser (drag and drop) logo pada Visual Editor untuk menentukan koordinat posisi penempatan watermark.
+4. Tahan dan geserlogo pada Visual Editor untuk menentukan koordinat posisi penempatan watermark.
 5. Gunakan slider Blending Settings untuk menyesuaikan tingkat transparansi gambar, skala ukuran logo, dan rotasi.
 6. Klik tombol "Process Watermark".
 7. Sistem akan memproses gambar dan menampilkannya di bagian bawah halaman. Anda dapat mengklik tombol "Download Image" untuk menyimpan hasil akhirnya.
