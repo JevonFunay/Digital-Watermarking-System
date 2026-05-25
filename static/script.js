@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let mainImgLoaded = false;
     let logoImgLoaded = false;
+    let originalLogoDataURL = null;
+    let transparentLogoDataURL = null;
+    const autoRemoveBgCheckbox = document.getElementById('auto-remove-bg');
 
     const submitBtn = document.getElementById('process-btn');
     const spinner = document.getElementById('btn-spinner');
@@ -35,7 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorAlert = document.getElementById('error-alert');
 
     // Update slider values
-    alphaInput.addEventListener('input', (e) => alphaVal.textContent = e.target.value);
+    alphaInput.addEventListener('input', (e) => {
+        alphaVal.textContent = e.target.value;
+        updateCanvas();
+    });
     betaInput.addEventListener('input', (e) => {
         betaVal.textContent = e.target.value;
         updateCanvas();
@@ -48,6 +54,12 @@ document.addEventListener('DOMContentLoaded', () => {
         angleVal.textContent = e.target.value;
         updateCanvas();
     });
+
+    if (autoRemoveBgCheckbox) {
+        autoRemoveBgCheckbox.addEventListener('change', () => {
+            applyLogoSource();
+        });
+    }
 
     // Setup Drag & Drop and Preview
     function setupUploadBox(box, input, previewId) {
@@ -85,6 +97,105 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Helper to convert Data URL to Blob for file submission
+    function dataURLtoBlob(dataurl) {
+        const arr = dataurl.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], {type: mime});
+    }
+
+    // Deteksi & Hilangkan Background Solid Logo dengan Soft Chroma Keying
+    function processLogoTransparency(dataURL, callback) {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
+            ctx.drawImage(img, 0, 0);
+            
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            const getPixel = (x, y) => {
+                const idx = (y * w + x) * 4;
+                return [data[idx], data[idx+1], data[idx+2], data[idx+3]];
+            };
+            
+            // Ambil warna piksel di 4 sudut
+            const corners = [
+                getPixel(0, 0),
+                getPixel(w - 1, 0),
+                getPixel(0, h - 1),
+                getPixel(w - 1, h - 1)
+            ];
+            
+            // Deteksi jika 4 sudut solid/tidak transparan dan memiliki warna serupa
+            const isSolid = corners.every(c => c[3] === 255) && 
+                            corners.every(c => {
+                                const diff = Math.abs(c[0] - corners[0][0]) + 
+                                             Math.abs(c[1] - corners[0][1]) + 
+                                             Math.abs(c[2] - corners[0][2]);
+                                return diff < 40; // Toleransi kesamaan warna sudut
+                            });
+            
+            if (isSolid) {
+                const bgR = corners[0][0];
+                const bgG = corners[0][1];
+                const bgB = corners[0][2];
+                
+                // Lakukan pembersihan warna background dengan Soft Chroma Keying
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i+1];
+                    const b = data[i+2];
+                    
+                    const dist = Math.sqrt((r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2);
+                    
+                    if (dist < 30) {
+                        data[i+3] = 0; // Transparan penuh
+                    } else if (dist < 45) {
+                        // Soft edge transition untuk hasil potong yang halus (anti-aliasing)
+                        const softAlpha = ((dist - 30) / 15) * 255;
+                        data[i+3] = Math.min(data[i+3], softAlpha);
+                    }
+                }
+                
+                ctx.putImageData(imgData, 0, 0);
+                callback(canvas.toDataURL('image/png'));
+            } else {
+                // Tidak memiliki background solid, biarkan apa adanya
+                callback(dataURL);
+            }
+        };
+        img.src = dataURL;
+    }
+
+    // Terapkan sumber gambar logo berdasarkan toggle switch
+    function applyLogoSource() {
+        if (!logoImgLoaded || !originalLogoDataURL) return;
+        
+        const previewElement = document.getElementById('logo-preview');
+        
+        if (autoRemoveBgCheckbox && autoRemoveBgCheckbox.checked && transparentLogoDataURL) {
+            canvasLogo.src = transparentLogoDataURL;
+            previewElement.src = transparentLogoDataURL;
+        } else {
+            canvasLogo.src = originalLogoDataURL;
+            previewElement.src = originalLogoDataURL;
+        }
+        
+        setTimeout(updateCanvas, 50);
+    }
+
     function showPreview(file, previewElement, previewId) {
         if (file && (file.type === 'image/jpeg' || file.type === 'image/png')) {
             const reader = new FileReader();
@@ -95,15 +206,29 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (previewId === 'main-preview') {
                     canvasMain.src = e.target.result;
                     mainImgLoaded = true;
+                    if (mainImgLoaded && logoImgLoaded) {
+                        editorSection.style.display = 'block';
+                        settingsSection.style.display = 'block';
+                        setTimeout(updateCanvas, 100);
+                    }
                 } else if (previewId === 'logo-preview') {
-                    canvasLogo.src = e.target.result;
+                    originalLogoDataURL = e.target.result;
                     logoImgLoaded = true;
-                }
-                
-                if (mainImgLoaded && logoImgLoaded) {
-                    editorSection.style.display = 'block';
-                    settingsSection.style.display = 'block';
-                    setTimeout(updateCanvas, 100);
+                    
+                    // Reset transparent logo before processing
+                    transparentLogoDataURL = null;
+                    
+                    // Jalankan deteksi transparansi secara asinkron
+                    processLogoTransparency(originalLogoDataURL, (processedUrl) => {
+                        transparentLogoDataURL = processedUrl;
+                        applyLogoSource();
+                        
+                        if (mainImgLoaded && logoImgLoaded) {
+                            editorSection.style.display = 'block';
+                            settingsSection.style.display = 'block';
+                            setTimeout(updateCanvas, 100);
+                        }
+                    });
                 }
             };
             reader.readAsDataURL(file);
@@ -117,6 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const scale = parseFloat(scaleInput.value) / 100;
         const angle = parseFloat(angleInput.value);
         const beta = parseFloat(betaInput.value);
+        const alpha = parseFloat(alphaInput.value);
         
         const mainRect = canvasMain.getBoundingClientRect();
         
@@ -124,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         canvasLogoContainer.style.width = logoWidth + 'px';
         
         canvasLogo.style.opacity = beta;
+        canvasLogoContainer.style.backgroundColor = `rgba(0, 0, 0, ${1 - alpha})`;
         canvasLogoContainer.style.transform = `rotate(${angle}deg)`;
         
         let px = parseFloat(posXInput.value);
@@ -187,6 +314,14 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Reset Error
         errorAlert.style.display = 'none';
+
+        // Validasi programatik untuk mencegah submit kosong
+        if (!mainImgLoaded || !logoImgLoaded) {
+            errorAlert.textContent = 'Harap unggah gambar utama dan logo watermark terlebih dahulu.';
+            errorAlert.style.display = 'block';
+            errorAlert.scrollIntoView({ behavior: 'smooth' });
+            return;
+        }
         
         // Show Loading State
         submitBtn.disabled = true;
@@ -195,6 +330,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultSection.style.display = 'none';
 
         const formData = new FormData(e.target);
+
+        // Jika fitur auto-transparansi aktif dan terdapat data logo transparan yang diproses
+        if (autoRemoveBgCheckbox && autoRemoveBgCheckbox.checked && transparentLogoDataURL && transparentLogoDataURL !== originalLogoDataURL) {
+            try {
+                const logoBlob = dataURLtoBlob(transparentLogoDataURL);
+                formData.set('logo', logoBlob, 'logo_transparent.png');
+            } catch (err) {
+                console.error('Gagal mengonversi logo transparan:', err);
+            }
+        }
 
         try {
             const response = await fetch('/process', {

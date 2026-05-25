@@ -26,7 +26,7 @@
                         <div class="upload-grid" style="grid-template-columns: 1fr; gap: 1.5rem;">
                             <!-- Main Image Upload -->
                             <div class="upload-box" id="main-upload-box">
-                                <input type="file" id="main_image" name="main_image" accept="image/png, image/jpeg" required hidden>
+                                <input type="file" id="main_image" name="main_image" accept="image/png, image/jpeg" hidden>
                                 <div class="upload-content">
                                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                                     <h3>Upload Main Image</h3>
@@ -37,7 +37,7 @@
 
                             <!-- Logo Upload -->
                             <div class="upload-box" id="logo-upload-box">
-                                <input type="file" id="logo" name="logo" accept="image/png, image/jpeg" required hidden>
+                                <input type="file" id="logo" name="logo" accept="image/png, image/jpeg" hidden>
                                 <div class="upload-content">
                                     <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
                                     <h3>Upload Logo Watermark</h3>
@@ -93,6 +93,12 @@
                                 <div class="slider-group" style="display:none;">
                                     <input type="hidden" id="pos_x" name="pos_x" value="1.0">
                                     <input type="hidden" id="pos_y" name="pos_y" value="1.0">
+                                </div>
+                                <div class="checkbox-group" style="grid-column: span 2; display: flex; align-items: center; gap: 0.75rem; margin-top: 0.5rem; padding: 0.5rem 0;">
+                                    <input type="checkbox" id="auto-remove-bg" name="auto_remove_bg" checked style="width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: var(--primary-color);">
+                                    <label for="auto-remove-bg" style="cursor: pointer; font-size: 0.95rem; color: var(--text-main); margin: 0; display: flex; align-items: center; user-select: none;">
+                                        Auto-Transparansi Logo (Hapus Background Solid)
+                                    </label>
                                 </div>
                             </div>
                         </div>

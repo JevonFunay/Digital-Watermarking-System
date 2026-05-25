@@ -147,10 +147,8 @@ class Watermarker:
             # Jahit background: area di luar logo tetap asli, area di dalam logo menjadi redup
             bg_final = bg_outside_logo * (1.0 - alpha_mask[:, :, np.newaxis]) + bg_under_logo * alpha_mask[:, :, np.newaxis]
             
-            # Tambahkan foreground (logo) yang sudah dikenakan beta
-            fg = logo_float * effective_alpha
-            
-            final_roi = bg_final + fg
+            # Gabungkan background dan logo dengan Convex Alpha Blending (mencegah clipping ke warna putih)
+            final_roi = bg_final * (1.0 - effective_alpha) + logo_float * effective_alpha
             final_roi = np.clip(final_roi, 0, 255).astype(np.uint8)
             
             # Mask inv murni biner untuk pemrosesan alpha output
@@ -165,7 +163,7 @@ class Watermarker:
             mask_inv = cv2.bitwise_not(mask)
             
             roi_bg = cv2.bitwise_and(roi, roi, mask=mask)
-            blended = cv2.addWeighted(roi, alpha, logo_bgr, beta, 0)
+            blended = cv2.addWeighted(roi, (1.0 - beta) * alpha, logo_bgr, beta, 0)
             blended_fg = cv2.bitwise_and(blended, blended, mask=mask_inv)
             final_roi = cv2.add(roi_bg, blended_fg)
 

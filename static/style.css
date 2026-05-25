@@ -29,22 +29,16 @@ body {
     overflow-x: hidden;
 }
 
-/* Dynamic Animated Background Gradient */
+/* Static Background Gradient */
 .background-animation {
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle at center, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0) 50%),
-                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.15) 0%, rgba(15, 23, 42, 0) 40%);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.12) 0%, rgba(15, 23, 42, 0) 50%),
+                radial-gradient(circle at 90% 80%, rgba(139, 92, 246, 0.12) 0%, rgba(15, 23, 42, 0) 50%);
     z-index: -1;
-    animation: rotateBg 20s linear infinite;
-}
-
-@keyframes rotateBg {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* Glassmorphism Container */
