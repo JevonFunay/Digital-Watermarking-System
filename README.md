@@ -11,8 +11,7 @@ Sebuah sistem aplikasi web berbasis Python untuk menyisipkan identitas visual (l
 Pastikan Anda telah menginstal Python 3.x di komputer Anda.
 
 ## Cara Instalasi
-1. Clone repositori ini ke dalam komputer Anda:
-   git clone [URL_GITHUB_ANDA]
+1. Clone repositori ini ke dalam komputer Anda
 2. Masuk ke dalam direktori proyek:
    cd copyright
 3. Instal semua dependensi pustaka yang dibutuhkan menggunakan pip:
